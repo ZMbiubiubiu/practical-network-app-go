@@ -21,6 +21,7 @@ func TestDownloadRemoteResource(t *testing.T) {
 	expected := "Hello World"
 
 	ts := setupTestHTTPServer()
+	defer ts.Close()
 
 	data, err := fetchRemoteResource(ts.URL)
 	if err != nil {

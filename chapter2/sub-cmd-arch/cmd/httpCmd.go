@@ -9,15 +9,17 @@ import (
 )
 
 type httpConfig struct {
-	url  string
-	verb string
+	url    string
+	output string
+	verb   string
 }
 
 func HandleHttp(w io.Writer, args []string) error {
-	var v string
+	c := httpConfig{}
 	var fs = flag.NewFlagSet("http", flag.ContinueOnError)
 	fs.SetOutput(w)
-	fs.StringVar(&v, "verb", "GET", "HTTP method")
+	fs.StringVar(&c.verb, "verb", "GET", "HTTP method")
+	fs.StringVar(&c.output, "output", "", "result save to file-path")
 	fs.Usage = func() {
 		var usage = `
 http: A HTTP client.
@@ -34,7 +36,6 @@ http: <options> server`
 		return err
 	}
 
-	c := httpConfig{verb: v}
 	c.url = fs.Arg(0)
 
 	if fs.NArg() != 1 {
@@ -43,13 +44,17 @@ http: <options> server`
 
 	fmt.Fprintln(w, "Executing http command")
 
-	switch v {
+	switch c.verb {
 	case "GET":
 		data, err := fetchRemoteResource(c.url)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "Got \n: %s\n", string(data))
+		if c.output != "" {
+			fmt.Fprintf(w, "should write data to file, path is %s\n", c.output)
+		} else {
+			fmt.Fprintf(w, "Got \n: %s\n", string(data))
+		}
 	case "POST", "HEAD":
 	default:
 		return errors.New("invalid HTTP method")
