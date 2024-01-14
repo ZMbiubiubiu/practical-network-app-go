@@ -7,7 +7,7 @@ import (
 
 func Register(mux *http.ServeMux, conf config.AppConfig) {
 	mux.Handle(
-		"/healthz",
+		"/health",
 		&app{conf: conf, handler: healthCheckHandler},
 	)
 	mux.Handle(
