@@ -26,6 +26,7 @@ func TestFetchBadRemoteResource(t *testing.T) {
 	if err == nil {
 		t.Fatalf("Expected non-nil error， but got:%v", err)
 	}
+	t.Logf("err=%v", err)
 }
 
 func startBadTestHTTPServerV2(signal chan struct{}) *httptest.Server {
@@ -50,4 +51,31 @@ func TestFetchBadRemoteResourceV2(t *testing.T) {
 	if err == nil {
 		t.Fatalf("Expected non-nil error， but got:%v", err)
 	}
+}
+
+func startBadTestHTTPServerV3() *httptest.Server {
+	return httptest.NewServer(
+		http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			select {
+			case <-time.After(10 * time.Second):
+				fmt.Println("Hello World")
+				fmt.Fprintf(writer, "Hello World")
+			case <-request.Context().Done():
+				fmt.Printf("request context done, %s\n", request.Context().Err().Error())
+				fmt.Fprintf(writer, request.Context().Err().Error())
+			}
+		}))
+}
+
+func TestFetchBadRemoteResourceV3(t *testing.T) {
+	ts := startBadTestHTTPServerV3()
+	defer ts.Close()
+
+	client := &http.Client{Timeout: 1 * time.Second}
+
+	_, err := fetchRemoteResource(client, ts.URL)
+	if err == nil {
+		t.Fatalf("Expected non-nil error， but got:%v", err)
+	}
+	t.Logf("err=%v", err)
 }
