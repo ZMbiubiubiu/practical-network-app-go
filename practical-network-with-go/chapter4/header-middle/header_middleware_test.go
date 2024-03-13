@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func startHTTPServer() *httptest.Server {
@@ -16,7 +18,7 @@ func startHTTPServer() *httptest.Server {
 	}))
 }
 
-func TestAddHeaderMiddleware_RoundTrip(t *testing.T) {
+func TestAddHeaderMiddleware(t *testing.T) {
 	testHeaders := map[string]string{
 		"X-Client-Id": "test-client",
 		"X-Auth-Hash": "random$string",
@@ -27,13 +29,9 @@ func TestAddHeaderMiddleware_RoundTrip(t *testing.T) {
 
 	client := createClient(testHeaders)
 	resp, err := client.Get(ts.URL)
-	if err != nil {
-		t.Fatalf("Expected nil, but got %v\n", err)
-	}
+	assert.Nil(t, err)
 
 	for k := range testHeaders {
-		if resp.Header.Get(k) != testHeaders[k] {
-			t.Fatalf("testHeaders %s expected get %s, but got %s\n", k, testHeaders[k], resp.Header.Get(k))
-		}
+		assert.Equal(t, testHeaders[k], resp.Header.Get(k))
 	}
 }
