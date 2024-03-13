@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func setupTestHTTPServer() *httptest.Server {
@@ -26,10 +28,6 @@ func TestDownloadRemoteResource(t *testing.T) {
 	defer ts.Close()
 
 	data, err := fetchRemoteResource(ts.URL)
-	if err != nil {
-		t.Fatalf("expected nil, but got %v\n", err)
-	}
-	if expected != string(data) {
-		t.Fatalf("expected %s, but got %v\n", expected, string(data))
-	}
+	assert.Nil(t, err)
+	assert.Equal(t, expected, string(data))
 }
